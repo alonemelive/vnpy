@@ -17,7 +17,7 @@ choco install git -y
 ::下载vn.py
 call refreshenv
 cd c:\
-git clone "https://github.com/vnpy/vnpy.git"
+git clone "https://github.com/alonemelive/vnpy.git"
 
 ::注册MongoDB为系统服务
 cd vnpy
