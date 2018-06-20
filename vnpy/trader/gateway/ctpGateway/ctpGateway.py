@@ -138,8 +138,7 @@ class CtpGateway(VtGateway):
                   #text = base64.b32decode( password )
                   password = base64.b32decode( obj.decrypt(base64.b32decode( password )) )
                   userID = base64.b32decode( obj.decrypt(base64.b32decode( userID )) )
-                  # password = base64.b32encode( obj.encrypt(base64.b32encode( password )) )
-                  # userID = base64.b32encode( obj.encrypt(base64.b32encode( userID )) )
+                  
             
             # 如果json文件提供了验证码
             if 'authCode' in setting: 
