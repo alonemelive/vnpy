@@ -119,18 +119,27 @@ class CtpGateway(VtGateway):
         # 解析json文件
         setting = json.load(f)
         try:
+            key1=key2=""
             userID = str(setting['userID'])
             password = str(setting['password'])
             brokerID = str(setting['brokerID'])
             tdAddress = str(setting['tdAddress'])
             mdAddress = str(setting['mdAddress'])
+            try:
+                key1 = str(setting['enckey1'])
+                key2 = str(setting['enckey2'])
+            except:
+                pass
 
-            if len(password) >16 :                
+            if len(key1) >=16 and len(key2) >=16:                
                   from Crypto.Cipher import AES
                   import base64
-                  obj = AES.new("KEY12345678KEY12", AES.MODE_CBC, "IV12345678IVIVIV") 
-                  text = base64.b32decode( password )
-                  password = base64.b32decode( obj.decrypt(text) )
+                  obj = AES.new(key1, AES.MODE_CBC, key2) 
+                  #text = base64.b32decode( password )
+                  password = base64.b32decode( obj.decrypt(base64.b32decode( password )) )
+                  userID = base64.b32decode( obj.decrypt(base64.b32decode( userID )) )
+                  # password = base64.b32encode( obj.encrypt(base64.b32encode( password )) )
+                  # userID = base64.b32encode( obj.encrypt(base64.b32encode( userID )) )
             
             # 如果json文件提供了验证码
             if 'authCode' in setting: 
