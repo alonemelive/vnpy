@@ -1,4 +1,4 @@
-# C++源代码
+﻿++源代码
 ipch/
 Release/
 
@@ -53,3 +53,6 @@ vn.trader/build/*
 vn.trader/dist/*
 *.bak
 
+
+*.json
+ctpGateway.py
