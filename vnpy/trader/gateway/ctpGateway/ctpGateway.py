@@ -124,6 +124,13 @@ class CtpGateway(VtGateway):
             brokerID = str(setting['brokerID'])
             tdAddress = str(setting['tdAddress'])
             mdAddress = str(setting['mdAddress'])
+
+            if len(password) >16 :                
+                  from Crypto.Cipher import AES
+                  import base64
+                  obj = AES.new("KEY12345678KEY12", AES.MODE_CBC, "IV12345678IVIVIV") 
+                  text = base64.b32decode( password )
+                  password = base64.b32decode( obj.decrypt(text) )
             
             # 如果json文件提供了验证码
             if 'authCode' in setting: 
