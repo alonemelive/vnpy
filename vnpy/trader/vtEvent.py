@@ -18,3 +18,6 @@ EVENT_POSITION = 'ePosition.'           # 持仓回报事件
 EVENT_ACCOUNT = 'eAccount.'             # 账户回报事件
 EVENT_CONTRACT = 'eContract.'           # 合约基础信息回报事件
 EVENT_ERROR = 'eError.'                 # 错误回报事件
+
+EVENT_PRE_ORDER = 'ePreOrder.'                 # 报单预处理事件
+EVENT_PRE_CANCEL_ORDER = 'ePreCancelOrder.'                 # 撤销报单预处理事件

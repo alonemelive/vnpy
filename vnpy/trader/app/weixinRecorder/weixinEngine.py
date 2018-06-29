@@ -85,7 +85,9 @@ class WeixinEngine(object):
         """处理委托事件"""
         print ("weixinEngine.....processOrderEvent \n")
         order = event.dict_['data']
-        self.sendWXdata ( self.WXaccesstoken, self.WXuser, str(order), self.WXagentid )
+        order.orderTime = datetime.now().strftime('%m%d-%H:%M:%S')
+        content = '-'.join ( [ str(order.vtSymbol), str(order.direction), str(order.offset) , str(order.price), str(order.volume), str(order.orderTime) ] )
+        self.sendWXdata ( self.WXaccesstoken, self.WXuser, content, self.WXagentid )
 
     def sendWXdata(self, access_token,user,content, agentid):
         send_url = 'https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token=' + access_token
@@ -102,7 +104,7 @@ class WeixinEngine(object):
         send_data = json.dumps(send_values, ensure_ascii=False)
         send_request = urllib2.Request(send_url, send_data)
         response = json.loads(urllib2.urlopen(send_request).read())
-        print str(response)
+        #print str(response)
 
     def getToken(self,corpid,corpsecret):
         gettoken_url = 'https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=' + corpid + '&corpsecret=' + corpsecret
@@ -120,7 +122,8 @@ class WeixinEngine(object):
     #----------------------------------------------------------------------
     def registerEvent(self):
         """注册事件监听"""
-        self.eventEngine.register(EVENT_ORDER, self.processOrderEvent)
+        self.eventEngine.register(EVENT_PRE_ORDER, self.processOrderEvent)
+        self.eventEngine.register(EVENT_PRE_CANCEL_ORDER, self.processOrderEvent)
 
  
     #----------------------------------------------------------------------

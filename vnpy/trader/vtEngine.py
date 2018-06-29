@@ -134,6 +134,10 @@ class MainEngine(object):
 
         gateway = self.getGateway(gatewayName)
         
+        event1 = Event(type_=EVENT_PRE_ORDER)
+        event1.dict_['data'] = orderReq
+        self.eventEngine.put(event1)
+
         if gateway:
             vtOrderID = gateway.sendOrder(orderReq)
             self.dataEngine.updateOrderReq(orderReq, vtOrderID)     # 更新发出的委托请求到数据引擎中
@@ -145,6 +149,10 @@ class MainEngine(object):
     def cancelOrder(self, cancelOrderReq, gatewayName):
         """对特定接口撤单"""
         gateway = self.getGateway(gatewayName)
+
+        event1 = Event(type_=EVENT_PRE_CANCEL_ORDER)
+        event1.dict_['data'] = cancelOrderReq
+        self.eventEngine.put(event1)
         
         if gateway:
             gateway.cancelOrder(cancelOrderReq)   

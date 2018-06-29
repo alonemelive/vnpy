@@ -18,7 +18,7 @@ from vnpy.trader.vtGateway import *
 from vnpy.trader.vtFunction import getJsonPath, getTempPath
 from vnpy.trader.vtConstant import GATEWAYTYPE_FUTURES
 from .language import text
-
+from vnpy.trader.app.weixinRecorder.weixinEngine import WeixinEngine
 
 # 以下为一些VT类型和CTP类型的映射字典
 # 价格类型映射
@@ -101,7 +101,7 @@ class CtpGateway(VtGateway):
         
         self.qryEnabled = False         # 循环查询
 
-        self.sendOrderFlag = True       # 是否正的发送订单
+        self.sendOrderFlag = "False"       # 是否正的发送订单
         
         self.fileName = self.gatewayName + '_connect.json'
         self.filePath = getJsonPath(self.fileName, __file__)        
@@ -130,13 +130,11 @@ class CtpGateway(VtGateway):
             try:
                 key1 = str(setting['enckey1'])
                 key2 = str(setting['enckey2'])
+                self.sendOrderFlag = setting['sendOrderFlag']
             except:
                 pass
 
-            try:
-                self.sendOrderFlag = bool(setting['sendOrderFlag'])
-            except:
-                pass
+            print ("self.sendOrderFlag %s\n" % str(self.sendOrderFlag) )
 
             if len(key1) >=16 and len(key2) >=16:                
                   from Crypto.Cipher import AES
@@ -179,12 +177,12 @@ class CtpGateway(VtGateway):
     #----------------------------------------------------------------------
     def sendOrder(self, orderReq):
         """发单"""
-        if self.sendOrderFlag :
+        if self.sendOrderFlag == "True" :
             return self.tdApi.sendOrder(orderReq)
     #----------------------------------------------------------------------
     def cancelOrder(self, cancelOrderReq):
         """撤单"""
-        if self.sendOrderFlag :
+        if self.sendOrderFlag == "True" :
             self.tdApi.cancelOrder(cancelOrderReq)
     #----------------------------------------------------------------------
     def qryAccount(self):
