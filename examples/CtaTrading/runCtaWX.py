@@ -15,10 +15,10 @@ from datetime import datetime, time
 from vnpy.event import EventEngine2
 from vnpy.trader.vtEvent import EVENT_LOG, EVENT_ERROR
 from vnpy.trader.vtEngine import MainEngine, LogEngine
-from vnpy.trader.gateway import weixinGateway
 from vnpy.trader.gateway import ctpGateway
 from vnpy.trader.app import ctaStrategy
 from vnpy.trader.app.ctaStrategy.ctaBase import EVENT_CTA_LOG
+from vnpy.trader.app import weixinRecorder
 
 
 
@@ -49,9 +49,14 @@ def runChildProcess():
     
     me = MainEngine(ee)
 
+    le.info(u'bbbbbbbbbbbbbbbbbbbbbbbbbbbbb')
     me.addGateway(ctpGateway)
 
+    sleep(10)                       # 等待CTP接口初始化
+    le.info(u'aaaaaaaaaaaaaaaaaaaaaaaaaaa')
+
     me.addApp(ctaStrategy)
+    me.addApp(weixinRecorder)
     le.info(u'主引擎创建成功')
     
     ee.register(EVENT_LOG, le.processLogEvent)
@@ -59,6 +64,7 @@ def runChildProcess():
     ee.register(EVENT_ERROR, processErrorEvent)
     le.info(u'注册日志事件监听')
     
+
     me.connect('CTP')
     le.info(u'连接CTP接口')
     
@@ -100,6 +106,7 @@ def runParentProcess():
     while True:
         currentTime = datetime.now().time()
         recording = False
+        recording = True
         
         # 判断当前处于的时间段
         if ((currentTime >= DAY_START and currentTime <= DAY_END) or
@@ -126,7 +133,7 @@ def runParentProcess():
 
 
 if __name__ == '__main__':
-    runChildProcess()
+    #runChildProcess()
     
     # 尽管同样实现了无人值守，但强烈建议每天启动时人工检查，为自己的PNL负责
-    #runParentProcess()
+    runParentProcess()
