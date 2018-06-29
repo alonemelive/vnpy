@@ -6,7 +6,6 @@
 
 from vnpy.event import Event
 from vnpy.trader.uiQt import QtWidgets, QtCore
-from .drBase import EVENT_DATARECORDER_LOG
 from .language import text
 
 
@@ -110,7 +109,7 @@ class WeixinEngineManager(QtWidgets.QWidget):
     def registerEvent(self):
         """注册事件监听"""
         self.signal.connect(self.updateLog)
-        self.eventEngine.register(EVENT_DATARECORDER_LOG, self.signal.emit)
+        self.eventEngine.register(EVENT_ORDER, self.signal.emit)
         
     #----------------------------------------------------------------------
     def updateSetting(self):

@@ -100,6 +100,8 @@ class CtpGateway(VtGateway):
         self.tdConnected = False        # 交易API连接状态
         
         self.qryEnabled = False         # 循环查询
+
+        self.sendOrderFlag = True       # 是否正的发送订单
         
         self.fileName = self.gatewayName + '_connect.json'
         self.filePath = getJsonPath(self.fileName, __file__)        
@@ -119,11 +121,31 @@ class CtpGateway(VtGateway):
         # 解析json文件
         setting = json.load(f)
         try:
+            key1=key2=""
             userID = str(setting['userID'])
             password = str(setting['password'])
             brokerID = str(setting['brokerID'])
             tdAddress = str(setting['tdAddress'])
             mdAddress = str(setting['mdAddress'])
+            try:
+                key1 = str(setting['enckey1'])
+                key2 = str(setting['enckey2'])
+            except:
+                pass
+
+            try:
+                self.sendOrderFlag = bool(setting['sendOrderFlag'])
+            except:
+                pass
+
+            if len(key1) >=16 and len(key2) >=16:                
+                  from Crypto.Cipher import AES
+                  import base64
+                  obj = AES.new(key1, AES.MODE_CBC, key2) 
+                  #text = base64.b32decode( password )
+                  password = base64.b32decode( obj.decrypt(base64.b32decode( password )) )
+                  userID = base64.b32decode( obj.decrypt(base64.b32decode( userID )) )
+                  
             
             # 如果json文件提供了验证码
             if 'authCode' in setting: 
@@ -142,6 +164,7 @@ class CtpGateway(VtGateway):
             return            
         
         # 创建行情和交易接口对象
+        ##print ("connect .....%s\n" % self.gatewayName )
         self.mdApi.connect(userID, password, brokerID, mdAddress)
         self.tdApi.connect(userID, password, brokerID, tdAddress, authCode, userProductInfo)
         
@@ -156,13 +179,13 @@ class CtpGateway(VtGateway):
     #----------------------------------------------------------------------
     def sendOrder(self, orderReq):
         """发单"""
-        return self.tdApi.sendOrder(orderReq)
-        
+        if self.sendOrderFlag :
+            return self.tdApi.sendOrder(orderReq)
     #----------------------------------------------------------------------
     def cancelOrder(self, cancelOrderReq):
         """撤单"""
-        self.tdApi.cancelOrder(cancelOrderReq)
-        
+        if self.sendOrderFlag :
+            self.tdApi.cancelOrder(cancelOrderReq)
     #----------------------------------------------------------------------
     def qryAccount(self):
         """查询账户资金"""
@@ -247,10 +270,6 @@ class CtpMdApi(MdApi):
         self.brokerID = EMPTY_STRING        # 经纪商代码
         self.address = EMPTY_STRING         # 服务器地址
         
-        self.tradingDt = None               # 交易日datetime对象
-        self.tradingDate = EMPTY_STRING     # 交易日期字符串
-        self.tickTime = None                # 最新行情time对象
-        
     #----------------------------------------------------------------------
     def onFrontConnected(self):
         """服务器连接"""
@@ -297,14 +316,6 @@ class CtpMdApi(MdApi):
             # 重新订阅之前订阅的合约
             for subscribeReq in self.subscribedSymbols:
                 self.subscribe(subscribeReq)
-                
-            # 获取交易日
-            #self.tradingDate = data['TradingDay']
-            #self.tradingDt = datetime.strptime(self.tradingDate, '%Y%m%d')
-            
-            # 登录时通过本地时间来获取当前的日期
-            self.tradingDt = datetime.now()
-            self.tradingDate = self.tradingDt.strftime('%Y%m%d')
                 
         # 否则，推送错误信息
         else:
@@ -388,18 +399,7 @@ class CtpMdApi(MdApi):
         
         # 大商所日期转换
         if tick.exchange is EXCHANGE_DCE:
-            newTime = datetime.strptime(tick.time, '%H:%M:%S.%f').time()    # 最新tick时间戳
-            
-            # 如果新tick的时间小于夜盘分隔，且上一个tick的时间大于夜盘分隔，则意味着越过了12点
-            if (self.tickTime and 
-                newTime < NIGHT_TRADING and
-                self.tickTime > NIGHT_TRADING):
-                self.tradingDt += timedelta(1)                          # 日期加1
-                self.tradingDate = self.tradingDt.strftime('%Y%m%d')    # 生成新的日期字符串
-                
-            tick.date = self.tradingDate    # 使用本地维护的日期
-            
-            self.tickTime = newTime         # 更新上一个tick时间
+            tick.date = datetime.now().strftime('%Y%m%d')
         
         self.gateway.onTick(tick)
         

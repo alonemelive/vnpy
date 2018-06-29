@@ -65,6 +65,8 @@ class WeixinEngine(object):
         
         # 注册事件监听
         self.registerEvent()  
+        self.sendWXdata ( self.WXaccesstoken, self.WXuser, "开始微信通知...", self.WXagentid )
+
     
     #----------------------------------------------------------------------
     def loadSetting(self):

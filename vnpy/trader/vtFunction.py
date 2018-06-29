@@ -84,6 +84,12 @@ def getJsonPath(name, moduleFile):
     if os.path.isfile(currentJsonPath):
         jsonPathDict[name] = currentJsonPath
         return currentJsonPath
+
+    currentFolder = os.getenv('HOME') + "/etc"
+    currentJsonPath = os.path.join(currentFolder, name)
+    if os.path.isfile(currentJsonPath):
+        jsonPathDict[name] = currentJsonPath
+        return currentJsonPath
     
     moduleFolder = os.path.abspath(os.path.dirname(moduleFile))
     moduleJsonPath = os.path.join(moduleFolder, '.', name)
